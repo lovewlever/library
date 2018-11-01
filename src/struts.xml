@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+    "http://struts.apache.org/dtds/struts-2.3.dtd">
+<struts>
+	<!-- <constant name="struts.devMode" value="true" /> -->
+	<constant name="struts.multipart.maxSize" value="52428800" />
+	
+	<!-- <constant name="struts.action.extension" value="json"/> -->
+
+	<package name="library" extends="struts-default">
+		<interceptors>
+			<interceptor name="filexesits"
+				class="top.library.sub.action.intereptor.FileExsists"></interceptor>
+			<interceptor name="userSession"
+				class="top.library.sub.action.intereptor.UserSession"></interceptor>
+		</interceptors>
+
+		<!-- 用户区 -->
+		
+		<action name="reg"
+			class="top.library.sub.action.RegisterOrLogin" method="execute">
+			<result name="success">WEB-INF/content/msgerror.jsp</result>
+			<result name="input">WEB-INF/content/msgerror.jsp</result>
+		</action>
+
+		<action name="ln"
+			class="top.library.sub.action.RegisterOrLogin" method="Login">
+			<result name="success">/default.jsp</result>
+			<result name="input">WEB-INF/content/index.jsp</result>
+			<result name="error">WEB-INF/content/msgerror.jsp</result>
+		</action>
+
+		<action name="logout"
+			class="top.library.sub.action.RegisterOrLogin" method="logOut">
+			<result name="success">/default.jsp</result>
+			<result name="error">WEB-INF/content/msgerror.jsp</result>
+		</action>
+
+		<action name="*">
+			<interceptor-ref name="userSession"></interceptor-ref>
+			<result name="login">WEB-INF/content/user/login.jsp</result>
+			<result>/WEB-INF/content/{1}.jsp</result>
+		</action>
+
+		<!-- 留言信息区 -->
+		<action name="msgtoboard"
+			class="top.library.sub.action.MessageAction" method="msgboard">
+			<result name="success" type="dispatcher">/default.jsp</result>
+			<result name="input" type="dispatcher">WEB-INF/content/msgboard.jsp
+			</result>
+		</action>
+		<action name="message"
+			class="top.library.sub.action.MessageAction">
+			<result name="success" type="dispatcher">/WEB-INF/content/index.jsp
+			</result>
+		</action>
+		<action name="search"
+			class="top.library.sub.action.MessageAction" method="search">
+			<result name="success" type="dispatcher">WEB-INF/content/search.jsp
+			</result>
+		</action>
+
+		<!-- 文件管理区 -->
+		<action name="fileAll"
+			class="top.library.sub.action.FileAction">
+			<result name="success">WEB-INF/content/index.jsp</result>
+		</action>
+
+
+		<!-- //文件上传 -->
+		<action name="upload"
+			class="top.library.sub.action.UploadAction">
+			<interceptor-ref name="fileUpload">
+				<param name="maximumSize">31457280</param>
+			</interceptor-ref>
+			<interceptor-ref name="defaultStack" />
+			<param name="savePath">fileup</param>
+			<result>WEB-INF/content/msgerror.jsp</result>
+			<result name="success">/default.jsp</result>
+			<result name="error">WEB-INF/content/msgerror.jsp</result>
+		</action>
+		<!-- 下载文件 -->
+		<action name="download"
+			class="top.library.sub.action.DownloadFileAction">
+			<interceptor-ref name="filexesits"></interceptor-ref>
+			<interceptor-ref name="defaultStack" />
+			<result name="success" type="stream">
+				<param name="contentType">${contentType}</param>
+				<param name="inputName">targetName</param>
+				<param name="contentDisposition">attachment;filename="${downFileName}"</param>
+				<param name="bufferSize">1024</param>
+			</result>
+			<result name="error">WEB-INF/content/msgerror.jsp</result>
+		</action>
+	</package>
+
+	<package name="ajax" extends="json-default" namespace="/ajax">
+	
+		<action name="fileAllAjax"
+			class="top.library.sub.action.FileAction">
+			<result type="json">
+				<param name="root">result</param>
+			</result>
+		</action>
+		
+		<action name="rs"
+			class="top.library.sub.action.FileAction" method="returnSession">
+			<result type="json">
+				<param name="root">result</param>
+			</result>
+		</action>
+		
+		<action name="delfile"
+			class="top.library.sub.action.FileAction" method="deleteFile">
+			<result type="json">
+				<param name="root">result</param>
+			</result>
+		</action>
+	</package>
+
+</struts>

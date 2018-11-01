@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context-3.0.xsd
+           http://www.springframework.org/schema/aop 
+           http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+           http://www.springframework.org/schema/tx 
+           http://www.springframework.org/schema/tx/spring-tx-3.0.xsd">
+		
+	<!-- 自动检测 -->
+	<!-- <context:annotation-config/> -->
+	<context:component-scan
+		base-package="top.library.sub" />
+	<!-- 异常处理 -->
+	<bean
+		class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor"></bean>
+	<!-- Oracle数据源 -->
+<!-- 	<bean id="dataSource"
+		class="com.mchange.v2.c3p0.ComboPooledDataSource"
+		destroy-method="close">
+		<property name="driverClass"
+			value="oracle.jdbc.driver.OracleDriver" />
+		<property name="jdbcUrl"
+			value="jdbc:oracle:thin:@localhost:1521:xe" />
+		<property name="user" value="oaec" />
+		<property name="password" value="oaec" />
+		连接池
+		<property name="initialPoolSize" value="10" />
+		<property name="maxIdleTime" value="30" />
+		<property name="maxPoolSize" value="50" />
+		<property name="minPoolSize" value="10" />
+		<property name="maxStatements" value="100" />
+	</bean> -->
+
+	<!-- mysql数据源 -->
+	<bean id="dataSource"
+		class="com.mchange.v2.c3p0.ComboPooledDataSource"
+		destroy-method="close">
+		<property name="driverClass"
+			value="com.mysql.jdbc.Driver" />
+		<property name="jdbcUrl">
+			<value>jdbc:mysql://localhost:3306/oaec?characterEncoding=utf-8&amp;useSSL=false</value>
+		</property>
+		<property name="user" value="root" />
+		<property name="password" value="MyNewPass4!" />
+		<!-- 连接池 -->
+		<property name="initialPoolSize" value="3" />
+		<property name="maxIdleTime" value="5" />
+		<property name="maxPoolSize" value="3" />
+		<property name="minPoolSize" value="1" />
+		<property name="maxStatements" value="3" />
+	</bean>
+
+	<!-- session工厂 -->
+	<bean id="sessionFactory"
+		class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+		<property name="dataSource" ref="dataSource"></property>
+		<property name="packagesToScan">
+			<list>
+				<value>top.library.sub.model.entity</value>
+			</list>
+		</property>
+		<property name="hibernateProperties">
+			<props>
+				<!-- <prop key="hibernate.dialect">org.hibernate.dialect.Oracle10gDialect</prop> -->
+				<prop key="hibernate.dialect">org.hibernate.dialect.MySQL5Dialect</prop>
+				<prop key="hibernate.current_session_context_class">
+					org.springframework.orm.hibernate5.SpringSessionContext
+				</prop>
+				<!-- <prop key="hibernate.show_sql">true</prop> -->
+			</props>
+		</property>
+	</bean>
+	<!-- 事务管理器 -->
+	<bean id="txManager"
+		class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+	<!-- 通知 -->
+	<tx:advice id="txAdvice" transaction-manager="txManager">
+		<tx:attributes>
+			<tx:method name="get*" propagation="REQUIRED" />
+			<tx:method name="add*" propagation="REQUIRED" />
+			<tx:method name="exsits" propagation="REQUIRED" />
+			<tx:method name="registerUser" propagation="REQUIRED" />
+			<tx:method name="user*" propagation="REQUIRED" />
+			<tx:method name="find*" propagation="REQUIRED" />
+			<tx:method name="saveMessage" propagation="REQUIRED" />
+			<tx:method name="update" propagation="REQUIRED" />			
+			<tx:method name="delFile" propagation="REQUIRED" />
+			<tx:method name="*" read-only="true" />
+		</tx:attributes>
+	</tx:advice>
+	<!-- 通知器 -->
+	<aop:config>
+		<aop:pointcut
+			expression="execution(public * top.library.sub.model.service.Impl.*.*(..))"
+			id="pc" />
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="pc" />
+	</aop:config>
+
+		
+</beans>
