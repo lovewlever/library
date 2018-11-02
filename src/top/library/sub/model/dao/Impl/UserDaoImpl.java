@@ -59,6 +59,7 @@ public class UserDaoImpl implements UserDao {
 		Query query = currentSession().createQuery("from User where id=?0");
 		query.setParameter(0, id);
 		User result = (User) query.uniqueResult();
+		
 		return result;
 	}
 
